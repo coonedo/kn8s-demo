@@ -145,6 +145,8 @@ Welcome to Ubuntu 14.04.4 LTS (GNU/Linux 3.13.0-83-generic x86_64)
 	NORMALLY YOU NEED MULTIPLE MACHINES 
 
 
+	####NOTE: Check for later versions as versions become obselete ###
+
 -	RUN etcd
 	etcd is a highly-available key value store which Kubernetes uses for
 	persistent storage of all of its REST API objects
@@ -152,7 +154,7 @@ Welcome to Ubuntu 14.04.4 LTS (GNU/Linux 3.13.0-83-generic x86_64)
 	used here to store the config settings
 
 	vagrant@kn8s:~$docker run --volume=/var/etcd:/var/etcd --net=host -d
-gcr.io/google_containers/etcd:2.0.12 /usr/local/bin/etcd --addr=127.0.0.1:4001
+gcr.io/google_containers/etcd:2.3.7 /usr/local/bin/etcd --addr=127.0.0.1:4001
 --bind-addr=0.0.0.0:4001 --data-dir=/var/etcd/data
 
 
@@ -170,7 +172,7 @@ sudo docker run \
 --net=host \
 --pid=host \
 --privileged=true \
--d gcr.io/google_containers/hyperkube:v1.0.1 \
+-d gcr.io/google_containers/hyperkube:v1.3.0 \
 /hyperkube kubelet --containerized --hostname-override="127.0.0.1"
 --address="0.0.0.0" --api-servers=http://localhost:8080
 --config=/etc/kubernetes/manifests
@@ -180,7 +182,7 @@ sudo docker run \
 
 Run the service proxy
 docker run -d --net=host --privileged
-gcr.io/google_containers/hyperkube:v1.0.1 /hyperkube proxy
+gcr.io/google_containers/hyperkube:v1.3.0 /hyperkube proxy
 --master=http://127.0.0.1:8080 --v=2
 
 
@@ -190,7 +192,7 @@ gcr.io/google_containers/hyperkube:v1.0.1 /hyperkube proxy
 	kubectl is the cmdline utility that we use to communicate with the
 	cluster
 
-wget https://storage.googleapis.com/kubernetes-release/release/v1.0.1/bin/linux/amd64/kubectl
+wget https://storage.googleapis.com/kubernetes-release/release/v1.3.0/bin/linux/amd64/kubectl
 
 chmod +x kubectl
 mkdir bin
@@ -272,12 +274,75 @@ vagrant@docker:~/docker-demo$
 
 	Copy files PC (cloned from git)
 	
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-To be continued 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
+vagrant@kn8s:~$ kubectl create -f pod-kn8s-demo.yml
+pod "nodehelloworld.example.com" created
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$ kubectl get pods
+NAME                         READY     STATUS              RESTARTS   AGE
+nodehelloworld.example.com   0/1       ContainerCreating   0          17s
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+
+
+	Add a service
+
+vagrant@kn8s:~$ kubectl create -f service-kn8s-demo.yml
+service "helloworld-service" created
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$ kubectl get service
+NAME                 CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+helloworld-service   10.0.0.114   <none>        3000/TCP   38s
+kubernetes           10.0.0.1     <none>        443/TCP    31m
+vagrant@kn8s:~$
+
+
+
+
+	Check the service is running
+
+	
+vagrant@kn8s:~$
+vagrant@kn8s:~$ curl 10.0.0.114:3000
+Hello World!vagrant@kn8s:~$
+vagrant@kn8s:~$
+
+
+
+	Delete pod & service
+
+	
+vagrant@kn8s:~$ kubectl delete pod nodehelloworld.example.com
+pod "nodehelloworld.example.com" deleted
+vagrant@kn8s:~$
+vagrant@kn8s:~$ kubectl delete service helloworld-service
+service "helloworld-service" deleted
+vagrant@kn8s:~$
+
+
+
+	CREATE MULTIPLE POD INSTANCES
+
+vagrant@kn8s:~$ kubectl create -f replication-controller-kn8s-demo.yml
+replicationcontroller "helloworld-controller" created
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$
+vagrant@kn8s:~$ kubectl get pods
+NAME                          READY     STATUS              RESTARTS   AGE
+helloworld-controller-177hy   0/1       ContainerCreating   0          23s
+helloworld-controller-43n12   0/1       ContainerCreating   0          23s
+vagrant@kn8s:~$
 
 
 
